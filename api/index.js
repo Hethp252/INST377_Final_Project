@@ -23,7 +23,16 @@ app.post('/api/save', async (req, res) => {
     res.json({ success: true, data });
 });
 
-
+// Endpoint 2: Database Read (Retrieve Watchlist from Supabase)
+app.get('/api/watchlist', async (req, res) => {
+    const { data, error } = await supabase.from('watchlist').select('*');
+    
+    if (error) {
+        console.error("Supabase Read Error:", error);
+        return res.status(400).json(error);
+    }
+    res.json(data);
+});
 
 // Only listen on a port if running locally; Vercel handles this automatically in production
 if (!process.env.VERCEL) {
