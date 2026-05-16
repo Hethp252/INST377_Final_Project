@@ -1,12 +1,4 @@
 // Fetch random quote on page load
-fetch('https://zenquotes.io/api/random')
-    .then(r => r.json())
-    .then(d => { 
-        if(document.getElementById('quote')) {
-            document.getElementById('quote').innerText = `"${d[0].q}" — ${d[0].a}`; 
-        }
-    });
-
 let chart;
 
 // Your exact Polygon range function
