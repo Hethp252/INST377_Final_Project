@@ -47,18 +47,34 @@ document.addEventListener("DOMContentLoaded", function() {
 // Database Endpoint Call: Save to Supabase
 async function saveToWatchlist(ticker) {
     try {
+        console.log("Attempting to save:", ticker);
+
         var response = await fetch('/api/save', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ ticker: ticker })
         });
-        var result = await response.json();
+
+        // Grab the raw text from the server FIRST
+        var rawText = await response.text();
+        console.log("Raw Server Response:", rawText);
+
+        // If the server failed (e.g., 404, 500, 502)
+        if (!response.ok) {
+            console.error("Server threw an error status:", response.status);
+            return alert("Server Error " + response.status + "\nCheck Inspect Element Console!");
+        }
+
+        // If it succeeded, safely parse the JSON
+        var result = JSON.parse(rawText);
+        
         if (result.success) {
             alert(ticker + " saved to your Supabase Database!");
             loadWatchlist();
         }
     } catch (err) {
         console.error("Database save failed:", err);
+        alert("Fetch failed completely. Check Vercel logs.");
     }
 }
 
