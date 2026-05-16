@@ -7,7 +7,7 @@ app.use(express.json());
 // ==========================================
 // 🔑 PASTE YOUR ACTUAL SUPABASE KEYS HERE
 // ==========================================
-const SUPABASE_URL = 'https://fksiydmwbyxxhzaihfqn.supabase.co/rest/v1/';
+const SUPABASE_URL = 'https://fksiydmwbyxxhzaihfqn.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZrc2l5ZG13Ynl4eGh6YWloZnFuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg3MzQ1NjUsImV4cCI6MjA5NDMxMDU2NX0._GpovLiI9IxuCzaTx8quG3pewx_T4tzN9JVk17nXc6M';
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
