@@ -1,7 +1,6 @@
 var currentChart = null;
 var activeTicker = "";
 
-// On page load, fetch the existing database records
 document.addEventListener("DOMContentLoaded", function() {
     if (document.getElementById("watchlistItems")) {
         loadWatchlist();
@@ -14,7 +13,7 @@ async function fetchStockData() {
     if (!ticker) return alert("Please enter a valid stock ticker symbol.");
 
     try {
-        var response = await fetch('/api?ticker=' + ticker);
+        var response = await fetch('/api/market?ticker=' + ticker);
         var data = await response.json();
 
         if (!data.results || data.results.length === 0) {
@@ -25,12 +24,10 @@ async function fetchStockData() {
         var stockResult = data.results[0];
         activeTicker = ticker;
 
-        // Reveal the details card
         document.getElementById("displayTicker").innerText = ticker;
         document.getElementById("closePrice").innerText = "$" + stockResult.c;
         document.getElementById("stockDetails").classList.remove("hidden");
 
-        // Set up the button listener to write to database
         document.getElementById("saveBtn").onclick = function() {
             saveToWatchlist(ticker);
         };
@@ -41,13 +38,10 @@ async function fetchStockData() {
     }
 }
 
-// JS Library 1: Rendering metrics natively with Chart.js
+// JS Library 1: Chart.js
 function renderChart(result) {
     var ctx = document.getElementById('stockChart').getContext('2d');
-    
-    if (currentChart) {
-        currentChart.destroy();
-    }
+    if (currentChart) currentChart.destroy();
 
     currentChart = new Chart(ctx, {
         type: 'bar',
@@ -56,8 +50,7 @@ function renderChart(result) {
             datasets: [{
                 label: activeTicker + ' Technical Boundaries (USD)',
                 data: [result.o, result.h, result.l, result.c],
-                backgroundColor: ['#60a5fa', '#34d399', '#f87171', '#fbbf24'],
-                borderWidth: 1
+                backgroundColor: ['#60a5fa', '#34d399', '#f87171', '#fbbf24']
             }]
         },
         options: {
@@ -67,7 +60,7 @@ function renderChart(result) {
     });
 }
 
-// Endpoint Call 2: Write Data to Supabase (via Backend)
+// Endpoint Call 2: Write Data to Supabase
 async function saveToWatchlist(ticker) {
     try {
         var response = await fetch('/api/save', {
@@ -76,18 +69,13 @@ async function saveToWatchlist(ticker) {
             body: JSON.stringify({ ticker: ticker })
         });
         var result = await response.json();
-        
-        if (result.success) {
-            loadWatchlist(); // Refresh the visible watchlist container
-        } else {
-            alert("Failed saving asset to profile.");
-        }
+        if (result.success) loadWatchlist();
     } catch (err) {
-        console.error("Database compilation anomaly:", err);
+        console.error("Database error:", err);
     }
 }
 
-// Endpoint Call 3: Retrieve Data from Supabase (via Backend)
+// Endpoint Call 3: Retrieve Data from Supabase
 async function loadWatchlist() {
     try {
         var response = await fetch('/api/watchlist');
@@ -103,6 +91,6 @@ async function loadWatchlist() {
             container.appendChild(li);
         });
     } catch (err) {
-        console.error("Failed downloading database elements:", err);
+        console.error("Database error:", err);
     }
 }
