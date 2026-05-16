@@ -1,7 +1,5 @@
-// Fetch random quote on page load
 let chart;
 
-// Your exact Polygon range function
 async function getStocks(val) {
     const symbol = (val || document.getElementById('ticker').value).toUpperCase();
     if (!symbol) return;
@@ -17,7 +15,6 @@ async function getStocks(val) {
     
     if(!data.results) return alert("Ticker not found.");
 
-    // Show the save section once data successfully returns
     if(document.getElementById('stockDetails')) {
         document.getElementById('displayTicker').innerText = symbol;
         document.getElementById('stockDetails').classList.remove('hidden');
@@ -37,54 +34,38 @@ async function getStocks(val) {
     });
 }
 
-// Automatically load your watchlist when dashboard opens
 document.addEventListener("DOMContentLoaded", function() {
     if (document.getElementById("watchlistItems")) {
         loadWatchlist();
     }
 });
 
-// Database Endpoint Call: Save to Supabase
 async function saveToWatchlist(ticker) {
     try {
-        console.log("Attempting to save:", ticker);
-
-        var response = await fetch('/api/save', {
+        const response = await fetch('/api/save', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ ticker: ticker })
         });
 
-        // Grab the raw text from the server FIRST
-        var rawText = await response.text();
-        console.log("Raw Server Response:", rawText);
+        if (!response.ok) return alert("Server Error " + response.status);
 
-        // If the server failed (e.g., 404, 500, 502)
-        if (!response.ok) {
-            console.error("Server threw an error status:", response.status);
-            return alert("Server Error " + response.status + "\nCheck Inspect Element Console!");
-        }
-
-        // If it succeeded, safely parse the JSON
-        var result = JSON.parse(rawText);
-        
+        const result = await response.json();
         if (result.success) {
             alert(ticker + " saved to your Supabase Database!");
             loadWatchlist();
         }
     } catch (err) {
-        console.error("Database save failed:", err);
-        alert("Fetch failed completely. Check Vercel logs.");
+        alert("Fetch failed completely.");
     }
 }
 
-// Database Endpoint Call: Retrieve from Supabase
 async function loadWatchlist() {
     try {
-        var response = await fetch('/api/watchlist');
-        var list = await response.json();
+        const response = await fetch('/api/watchlist');
+        const list = await response.json();
         
-        var container = document.getElementById("watchlistItems");
+        const container = document.getElementById("watchlistItems");
         container.innerHTML = "";
 
         if (!list || list.length === 0) {
@@ -93,12 +74,12 @@ async function loadWatchlist() {
         }
 
         list.forEach(function(item) {
-            var li = document.createElement("li");
+            const li = document.createElement("li");
             li.className = "watchlist-item";
             li.innerText = item.symbol;
             container.appendChild(li);
         });
     } catch (err) {
-        console.error("Database view failed:", err);
+         // Silently fail on error to keep production clean
     }
 }
