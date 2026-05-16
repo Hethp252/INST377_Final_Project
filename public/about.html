@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stock Tracker - About</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- JS Library 2: Leaflet CSS for mapping -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+</head>
+<body>
+    <nav class="navbar">
+        <a href="index.html">Home</a>
+        <a href="about.html" class="active">About</a>
+        <a href="project.html">Dashboard</a>
+    </nav>
+    <main class="container">
+        <h1>About This Project</h1>
+        <p>This full-stack application connects directly to the Polygon API for equity metrics and logs target watchlists into a cloud-hosted Supabase instance.</p>
+        
+        <h3>Our Headquarters</h3>
+        <div id="map" style="height: 300px; border-radius: 8px; margin-top: 20px;"></div>
+    </main>
+
+    <!-- JS Library 2: Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        // Quick initialization to show a contemporary map feature
+        var map = L.map('map').setView([38.9869, -76.9426], 14);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+        L.marker([38.9869, -76.9426]).addTo(map).bindPopup('UMD Campus').openPopup();
+    </script>
+</body>
+</html>
