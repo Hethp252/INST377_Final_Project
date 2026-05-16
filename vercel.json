@@ -1,3 +1,11 @@
 {
-  "cleanUrls": true
+  "version": 2,
+  "builds": [
+    { "src": "index.js", "use": "@vercel/node" }
+  ],
+  "routes": [
+    { "src": "/api/save", "methods": ["POST"], "dest": "index.js" },
+    { "src": "/api/watchlist", "methods": ["GET"], "dest": "index.js" },
+    { "src": "/(.*)", "dest": "index.js" }
+  ]
 }
