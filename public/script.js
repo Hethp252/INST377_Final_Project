@@ -1,65 +1,58 @@
-var currentChart = null;
-var activeTicker = "";
+// Fetch random quote on page load
+fetch('https://zenquotes.io/api/random')
+    .then(r => r.json())
+    .then(d => { 
+        if(document.getElementById('quote')) {
+            document.getElementById('quote').innerText = `"${d[0].q}" — ${d[0].a}`; 
+        }
+    });
 
-// Automatically fetch your saved database stocks when the page loads
+let chart;
+
+// Your exact Polygon range function
+async function getStocks(val) {
+    const symbol = (val || document.getElementById('ticker').value).toUpperCase();
+    if (!symbol) return;
+    const days = document.getElementById('days').value;
+    const apiKey = 'tHgJRkBS523RHblRlEMTfClV0UYJfNTp';
+    
+    const endDate = new Date();
+    const startDate = new Date();
+    startDate.setDate(endDate.getDate() - parseInt(days));
+    
+    const res = await fetch(`https://api.polygon.io/v2/aggs/ticker/${symbol}/range/1/day/${startDate.toISOString().split('T')[0]}/${endDate.toISOString().split('T')[0]}?apiKey=${apiKey}`);
+    const data = await res.json();
+    
+    if(!data.results) return alert("Ticker not found.");
+
+    // Show the save section once data successfully returns
+    if(document.getElementById('stockDetails')) {
+        document.getElementById('displayTicker').innerText = symbol;
+        document.getElementById('stockDetails').classList.remove('hidden');
+        document.getElementById('saveBtn').onclick = function() {
+            saveToWatchlist(symbol);
+        };
+    }
+
+    const ctx = document.getElementById('myChart').getContext('2d');
+    if(chart) chart.destroy();
+    chart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: data.results.map(i => new Date(i.t).toLocaleDateString()),
+            datasets: [{ label: symbol, data: data.results.map(i => i.c), borderColor: '#E62C03', fill: false }]
+        }
+    });
+}
+
+// Automatically load your watchlist when dashboard opens
 document.addEventListener("DOMContentLoaded", function() {
     if (document.getElementById("watchlistItems")) {
         loadWatchlist();
     }
 });
 
-// Run Finnhub API
-async function fetchStockData() {
-    var ticker = document.getElementById("tickerInput").value.toUpperCase().trim();
-    if (!ticker) return alert("Please enter a stock ticker.");
-
-    try {
-        var response = await fetch('/api/market?ticker=' + ticker);
-        var data = await response.json();
-
-        if (!data.results || data.results.length === 0 || !data.results[0].c) {
-            return alert("No data found for that ticker.");
-        }
-
-        var stockResult = data.results[0];
-        activeTicker = ticker;
-
-        // Show data and unhide the section
-        document.getElementById("displayTicker").innerText = ticker;
-        document.getElementById("closePrice").innerText = "$" + stockResult.c;
-        document.getElementById("stockDetails").style.display = "block"; // Reveals the save button and chart
-
-        // Attach function to the save button
-        document.getElementById("saveBtn").onclick = function() {
-            saveToWatchlist(ticker);
-        };
-
-        renderChart(stockResult);
-    } catch (err) {
-        console.error(err);
-    }
-}
-
-// Render Chart
-function renderChart(result) {
-    var ctx = document.getElementById('stockChart').getContext('2d');
-    if (currentChart) currentChart.destroy();
-
-    currentChart = new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels: ['Open', 'High', 'Low', 'Current'],
-            datasets: [{
-                label: activeTicker + ' Price (USD)',
-                data: [result.o, result.h, result.l, result.c],
-                backgroundColor: ['#60a5fa', '#34d399', '#f87171', '#fbbf24']
-            }]
-        },
-        options: { responsive: true, maintainAspectRatio: false }
-    });
-}
-
-// Write to Supabase
+// Database Endpoint Call: Save to Supabase
 async function saveToWatchlist(ticker) {
     try {
         var response = await fetch('/api/save', {
@@ -69,15 +62,15 @@ async function saveToWatchlist(ticker) {
         });
         var result = await response.json();
         if (result.success) {
-            alert(ticker + " saved to database!");
-            loadWatchlist(); // Refresh list on screen
+            alert(ticker + " saved to your Supabase Database!");
+            loadWatchlist();
         }
     } catch (err) {
-        console.error(err);
+        console.error("Database save failed:", err);
     }
 }
 
-// Read from Supabase
+// Database Endpoint Call: Retrieve from Supabase
 async function loadWatchlist() {
     try {
         var response = await fetch('/api/watchlist');
@@ -86,13 +79,18 @@ async function loadWatchlist() {
         var container = document.getElementById("watchlistItems");
         container.innerHTML = "";
 
+        if (!list || list.length === 0) {
+            container.innerHTML = "<li>Database empty</li>";
+            return;
+        }
+
         list.forEach(function(item) {
             var li = document.createElement("li");
-            li.style.cssText = "background: #e2e8f0; padding: 5px 10px; border-radius: 20px; font-weight: bold;";
+            li.className = "watchlist-item";
             li.innerText = item.symbol;
             container.appendChild(li);
         });
     } catch (err) {
-        console.error(err);
+        console.error("Database view failed:", err);
     }
 }

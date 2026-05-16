@@ -1,44 +1,21 @@
 import express from 'express';
-import path from 'path';
+import path from 'url';
 import { fileURLToPath } from 'url';
 import { createClient } from '@supabase/supabase-js';
-import axios from 'axios';
 
 const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+const __dirname = express.static ? path.dirname(__filename) : path.dirname(__filename);
 
 const app = express();
 app.use(express.json());
 
-// --- HARDCODED KEYS ---
-const SUPABASE_URL = 'https://fksiydmwbyxxhzaihfqn.supabase.co/rest/v1/';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZrc2l5ZG13Ynl4eGh6YWloZnFuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg3MzQ1NjUsImV4cCI6MjA5NDMxMDU2NX0._GpovLiI9IxuCzaTx8quG3pewx_T4tzN9JVk17nXc6M';
-const FINNHUB_API_KEY = 'd84dqvpr01qutij8p14g';
-
+const SUPABASE_URL = 'PASTE_YOUR_SUPABASE_URL_HERE';
+const SUPABASE_KEY = 'PASTE_YOUR_SUPABASE_ANON_KEY_HERE';
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
-// --- EXPLICIT FRONTEND ROUTES (Fixes the broken buttons and CSS) ---
-app.get('/style.css', (req, res) => res.sendFile(path.join(__dirname, 'public', 'style.css')));
-app.get('/script.js', (req, res) => res.sendFile(path.join(__dirname, 'public', 'script.js')));
+app.use(express.static(path.join(__dirname, 'public')));
 
-app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'public', 'index.html')));
-app.get('/index.html', (req, res) => res.sendFile(path.join(__dirname, 'public', 'index.html')));
-app.get('/about.html', (req, res) => res.sendFile(path.join(__dirname, 'public', 'about.html')));
-app.get('/project.html', (req, res) => res.sendFile(path.join(__dirname, 'public', 'project.html')));
-
-// --- API ENDPOINT 1: External API (Finnhub) ---
-app.get('/api/market', async (req, res) => {
-    const { ticker } = req.query;
-    try {
-        const url = `https://finnhub.io/api/v1/quote?symbol=${ticker}&token=${FINNHUB_API_KEY}`;
-        const response = await axios.get(url);
-        res.json({ results: [response.data] });
-    } catch (err) {
-        res.status(500).json({ error: "Finnhub fetch failed" });
-    }
-});
-
-// --- API ENDPOINT 2: Write to DB (Supabase) ---
+// Backend Endpoint 1: Write to Watchlist
 app.post('/api/save', async (req, res) => {
     const { ticker } = req.body;
     const { data, error } = await supabase.from('watchlist').insert([{ symbol: ticker }]);
@@ -46,17 +23,18 @@ app.post('/api/save', async (req, res) => {
     res.json({ success: true, data });
 });
 
-// --- API ENDPOINT 3: Read from DB (Supabase) ---
+// Backend Endpoint 2: Read Watchlist
 app.get('/api/watchlist', async (req, res) => {
     const { data, error } = await supabase.from('watchlist').select('*');
     if (error) return res.status(400).json(error);
     res.json(data);
 });
 
-// Fallback
-app.get('*', (req, res) => res.sendFile(path.join(__dirname, 'public', 'index.html')));
+app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+app.listen(PORT, () => console.log(`Running on port ${PORT}`));
 
 export default app;
