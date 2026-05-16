@@ -14,7 +14,7 @@ async function getStocks(val) {
     const symbol = (val || document.getElementById('ticker').value).toUpperCase();
     if (!symbol) return;
     const days = document.getElementById('days').value;
-    const apiKey = 'tHgJRkBS523RHblRlEMTfClV0UYJfNTp';
+    const apiKey = 'cK60kGvVcqsXfh86boN7TYYmcTIvQ_fm';
     
     const endDate = new Date();
     const startDate = new Date();
