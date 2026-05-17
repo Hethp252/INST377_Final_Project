@@ -3,56 +3,50 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Stock Tracker - Dashboard</title>
+    <title>Dashboard</title>
     <link rel="stylesheet" href="style.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
     <nav class="navbar">
         <a href="index.html">Home</a>
-        <a href="about.html">About</a>
         <a href="project.html" class="active">Dashboard</a>
+        <a href="about.html">About</a>
     </nav>
 
-    <div style="text-align: center; margin: 1rem auto; max-width: 600px; font-style: italic; color: #555;">
-        <p id="quote">Loading inspiration...</p>
-    </div>
 
     <main class="container dashboard-grid">
         <section class="search-section">
             <h2>Market Lookup</h2>
             <div class="search-box">
-                <!-- Matches ID 'ticker' -->
                 <input type="text" id="ticker" placeholder="e.g. AAPL">
                 
-                <!-- Time Range Selector mapped to ID 'days' -->
                 <select id="days" style="margin: 0 5px; padding: 5px;">
                     <option value="7">7 Days</option>
                     <option value="30" selected>30 Days</option>
                     <option value="90">90 Days</option>
                 </select>
 
-                <!-- Matches function name 'getStocks()' -->
                 <button onclick="getStocks()">Analyze</button>
             </div>
             
             <div id="stockDetails" class="stock-card hidden" style="margin-top: 15px;">
                 <h3 id="displayTicker">---</h3>
-                <button id="saveBtn" style="background-color: #E62C03; color: white; border: none; padding: 8px; cursor: pointer;">Save to Watchlist</button>
+                <button id="saveBtn" style="background-color: #E62C03; color: white;
+                border: none; padding: 8px; cursor: pointer;">Watchlist?</button>
             </div>
         </section>
 
         <section class="chart-section">
-            <h2>Performance Metrics</h2>
+            <h2>Chart</h2>
             <div class="chart-container">
-                <!-- Matches ID 'myChart' -->
                 <canvas id="myChart"></canvas>
             </div>
         </section>
 
         <section class="watchlist-section">
             <div style="display: flex; justify-content: space-between; align-items: center;">
-                <h2>Database Records</h2>
+                <h2>Watchlist</h2>
                 <button onclick="loadWatchlist()" style="background: #4b5563;">Refresh</button>
             </div>
             <ul id="watchlistItems"></ul>

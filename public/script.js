@@ -80,6 +80,5 @@ async function loadWatchlist() {
             container.appendChild(li);
         });
     } catch (err) {
-         // Silently fail on error to keep production clean
     }
 }
